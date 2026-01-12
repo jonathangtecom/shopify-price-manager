@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Logs - Shopify Price Manager{% endblock %}
+{% block content %}
+<div class="card">
+    <h2>Sync Logs</h2>
+    <form method="GET" action="/logs" class="filters">
+        <div class="form-group">
+            <label for="store_id">Store</label>
+            <select id="store_id" name="store_id" onchange="this.form.submit()">
+                <option value="all">All Stores</option>
+                {% for store in stores %}
+                <option value="{{ store.id }}" {{ 'selected' if selected_store == store.id else '' }}>{{ store.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" onchange="this.form.submit()">
+                <option value="all" {{ 'selected' if selected_status == 'all' else '' }}>All</option>
+                <option value="success" {{ 'selected' if selected_status == 'success' else '' }}>Success</option>
+                <option value="failed" {{ 'selected' if selected_status == 'failed' else '' }}>Failed</option>
+                <option value="running" {{ 'selected' if selected_status == 'running' else '' }}>Running</option>
+            </select>
+        </div>
+    </form>
+    {% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>Store</th>
+                <th>Started</th>
+                <th>Duration</th>
+                <th>Status</th>
+                <th>Stats</th>
+                <th>Triggered</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td><strong>{{ log.store_name }}</strong></td>
+                <td class="text-muted">{{ log.started_at | format_datetime }}</td>
+                <td class="text-muted">
+                    {% if log.finished_at %}
+                        {% set duration = (log.finished_at - log.started_at).total_seconds() %}
+                        {% if duration < 60 %}{{ "%.0f"|format(duration) }}s
+                        {% elif duration < 3600 %}{{ "%.1f"|format(duration / 60) }}m
+                        {% else %}{{ "%.1f"|format(duration / 3600) }}h{% endif %}
+                    {% else %}-{% endif %}
+                </td>
+                <td>
+                    {% if log.status.value == 'running' %}
+                        <span class="badge badge-info">🔄 Running</span>
+                    {% elif log.status.value == 'success' %}
+                        <span class="badge badge-success">✓ Success</span>
+                    {% else %}
+                        <span class="badge badge-danger">✗ Failed</span>
+                    {% endif %}
+                </td>
+                <td class="text-muted" style="font-size: 13px;">
+                    {% if log.products_processed > 0 %}
+                        {{ log.products_processed }} processed<br>
+                        <span style="color: #27ae60;">{{ log.products_price_set }} set</span> / 
+                        <span style="color: #e74c3c;">{{ log.products_price_cleared }} cleared</span>
+                    {% else %}-{% endif %}
+                </td>
+                <td>
+                    {% if log.triggered_by.value == 'scheduler' %}
+                        <span class="badge badge-secondary">Scheduled</span>
+                    {% else %}
+                        <span class="badge badge-info">Manual</span>
+                    {% endif %}
+                </td>
+                <td><a href="/logs/{{ log.id }}" class="btn btn-sm btn-secondary">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        {% if has_prev %}
+        <a href="/logs?store_id={{ selected_store }}&status={{ selected_status }}&page={{ page - 1 }}" class="btn btn-secondary btn-sm">← Prev</a>
+        {% endif %}
+        <span class="text-muted" style="padding: 8px;">Page {{ page }}</span>
+        {% if has_next %}
+        <a href="/logs?store_id={{ selected_store }}&status={{ selected_status }}&page={{ page + 1 }}" class="btn btn-secondary btn-sm">Next →</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="text-muted">No sync logs found.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Log Detail - Shopify Price Manager{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="flex justify-between align-center mb-4">
+        <h2>Sync Log: {{ log.store_name }}</h2>
+        <div>
+            <a href="/logs/{{ log.id }}/download" class="btn btn-primary" style="margin-right: 8px;">⬇ Download Log</a>
+            <a href="/logs" class="btn btn-secondary">← Back to Logs</a>
+        </div>
+    </div>
+    <table>
+        <tr><td class="text-muted" style="width: 150px;">Log ID</td><td><code>{{ log.id }}</code></td></tr>
+        <tr><td class="text-muted">Store</td><td>{{ log.store_name }}</td></tr>
+        <tr><td class="text-muted">Started</td><td>{{ log.started_at | format_datetime }}</td></tr>
+        <tr><td class="text-muted">Finished</td><td>{{ log.finished_at | format_datetime if log.finished_at else '-' }}</td></tr>
+        <tr>
+            <td class="text-muted">Duration</td>
+            <td>
+                {% if log.finished_at %}
+                    {% set duration = (log.finished_at - log.started_at).total_seconds() %}
+                    {{ "%.1f"|format(duration) }} seconds
+                {% else %}-{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="text-muted">Status</td>
+            <td>
+                {% if log.status.value == 'running' %}
+                    <span class="badge badge-info">🔄 Running</span>
+                {% elif log.status.value == 'success' %}
+                    <span class="badge badge-success">✓ Success</span>
+                {% else %}
+                    <span class="badge badge-danger">✗ Failed</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="text-muted">Triggered By</td>
+            <td>
+                {% if log.triggered_by.value == 'scheduler' %}Scheduled{% else %}Manual{% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="card">
+    <h3 style="font-size: 1.1em; margin-bottom: 15px;">Statistics</h3>
+    <table>
+        <tr><td class="text-muted">Products Processed</td><td>{{ log.products_processed }}</td></tr>
+        <tr><td class="text-muted">Prices Set/Updated</td><td style="color: #27ae60;">{{ log.products_price_set }}</td></tr>
+        <tr><td class="text-muted">Prices Cleared</td><td style="color: #e74c3c;">{{ log.products_price_cleared }}</td></tr>
+        <tr><td class="text-muted">Unchanged</td><td>{{ log.products_unchanged }}</td></tr>
+    </table>
+</div>
+{% if log.error_message %}
+<div class="card">
+    <h3 style="font-size: 1.1em; margin-bottom: 15px; color: #e74c3c;">Error Details</h3>
+    <p><strong>Message:</strong> {{ log.error_message }}</p>
+    {% if log.error_details %}
+    <p class="text-muted mt-2">Stack trace:</p>
+    <pre>{{ log.error_details }}</pre>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

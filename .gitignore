@@ -33,7 +33,7 @@ data/
 
 # Logs
 *.log
-logs/
+/logs/
 
 # Testing
 .pytest_cache/
