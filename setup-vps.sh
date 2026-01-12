@@ -131,7 +131,7 @@ echo -e "${GREEN}✓ Application started${NC}"
 echo ""
 
 # Step 7: Verify deployment
-echo -e "${YELLOW}[7/7] Verifying deployment${NC}"
+echo -e "${YELLOW}[7/8] Verifying deployment${NC}"
 
 # Check health endpoint
 if curl -sf http://localhost:8000/health > /dev/null; then
@@ -152,6 +152,23 @@ else
 fi
 
 echo ""
+
+# Step 8: Set up cron job for daily sync at 1 AM CET
+echo -e "${YELLOW}[8/8] Setting up daily sync schedule${NC}"
+
+# Create log directory
+mkdir -p /var/log/shopify-price-manager
+chown $ACTUAL_USER:$ACTUAL_USER /var/log/shopify-price-manager
+
+# Create cron job (1 AM CET = 0 1 * * * in CET timezone)
+CRON_JOB="0 1 * * * cd /opt/shopify-price-manager && /usr/bin/docker compose exec -T app python scripts/run_sync.py >> /var/log/shopify-price-manager/sync.log 2>&1"
+
+# Add to user's crontab
+(crontab -u $ACTUAL_USER -l 2>/dev/null | grep -v "shopify-price-manager" ; echo "$CRON_JOB") | crontab -u $ACTUAL_USER -
+
+echo -e "${GREEN}✓ Daily sync scheduled for 1 AM CET${NC}"
+
+echo ""
 echo "=============================================="
 echo -e "${GREEN}  ✓ Setup Complete!${NC}"
 echo "=============================================="
@@ -159,23 +176,20 @@ echo ""
 echo "Your Shopify Price Manager is ready!"
 echo ""
 echo "📱 Access your app at: https://$DOMAIN"
-echo "🔑 Username: $ADMIN_USERNAME"
 echo "🔑 Password: [the password you entered]"
+echo "⏰ Daily sync: 1 AM CET (automated)"
 echo ""
 echo "Useful commands:"
 echo "  View logs:        cd /opt/shopify-price-manager && docker compose logs -f"
+echo "  View sync logs:   tail -f /var/log/shopify-price-manager/sync.log"
 echo "  Restart:          cd /opt/shopify-price-manager && docker compose restart"
 echo "  Update app:       cd /opt/shopify-price-manager && git pull && docker compose up -d --build"
 echo "  Run manual sync:  cd /opt/shopify-price-manager && docker compose exec app python scripts/run_sync.py"
+echo "  Change password:  cd /opt/shopify-price-manager && ./set-password.sh"
 echo ""
 echo "Next steps:"
 echo "1. Visit https://$DOMAIN in your browser"
-echo "2. Login with your credentials"
-echo "3. Add your Shopify store"
+echo "2. Login with your password"
+echo "3. Add your Shopify store(s)"
 echo "4. Run your first sync!"
-echo ""
-echo "To set up automatic daily syncs at 1 AM CET, run:"
-echo "  crontab -e"
-echo "Then add this line:"
-echo "  0 1 * * * cd /opt/shopify-price-manager && docker compose exec -T app python scripts/run_sync.py >> /var/log/shopify-sync.log 2>&1"
 echo ""
