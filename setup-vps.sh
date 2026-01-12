@@ -69,8 +69,13 @@ echo ""
 
 # Step 3: Generate secrets
 echo -e "${YELLOW}[3/7] Generating secrets${NC}"
-echo "Installing Python bcrypt..."
-python3 -m pip install bcrypt >/dev/null 2>&1 || apt install -y python3-pip >/dev/null 2>&1 && python3 -m pip install bcrypt >/dev/null 2>&1
+
+# Check if bcrypt is already available
+if ! python3 -c "import bcrypt" 2>/dev/null; then
+    echo "Installing Python bcrypt (via apt)..."
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3-bcrypt > /dev/null
+fi
 
 echo "Generating password hash..."
 ADMIN_PASSWORD_HASH=$(python3 -c "import bcrypt; print(bcrypt.hashpw(b'$ADMIN_PASSWORD', bcrypt.gensalt()).decode())")
