@@ -90,14 +90,13 @@ echo ""
 echo -e "${YELLOW}[4/7] Creating .env file${NC}"
 cat > .env << EOF
 # Database
-DATABASE_PATH=/app/data/app.db
+database_path=/app/data/app.db
 
 # Session
-SECRET_KEY=$SECRET_KEY
+session_secret=$SECRET_KEY
 
-# Admin credentials
-ADMIN_USERNAME=$ADMIN_USERNAME
-ADMIN_PASSWORD_HASH=$ADMIN_PASSWORD_HASH
+# Admin credentials (note: no username, app only uses password)
+admin_password_hash=$ADMIN_PASSWORD_HASH
 
 # Application
 HOST=0.0.0.0

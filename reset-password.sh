@@ -46,15 +46,19 @@ fi
 # Generate new hash
 NEW_HASH=$(python3 -c "import bcrypt; print(bcrypt.hashpw(b'$NEW_PASSWORD', bcrypt.gensalt()).decode())")
 
-# Update .env file
+# Update .env file (using lowercase as required by config.py)
 if [ -f ".env" ]; then
-    if grep -q "^ADMIN_PASSWORD_HASH=" .env; then
-        # Replace existing hash
-        sed -i "s|^ADMIN_PASSWORD_HASH=.*|ADMIN_PASSWORD_HASH=$NEW_HASH|" .env
+    # Check for both uppercase and lowercase versions
+    if grep -q "^admin_password_hash=" .env; then
+        sed -i "s|^admin_password_hash=.*|admin_password_hash=$NEW_HASH|" .env
         echo "✓ Password hash updated in .env"
+    elif grep -q "^ADMIN_PASSWORD_HASH=" .env; then
+        # Fix uppercase to lowercase
+        sed -i "s|^ADMIN_PASSWORD_HASH=.*|admin_password_hash=$NEW_HASH|" .env
+        echo "✓ Password hash updated (fixed to lowercase)"
     else
         # Add hash if missing
-        echo "ADMIN_PASSWORD_HASH=$NEW_HASH" >> .env
+        echo "admin_password_hash=$NEW_HASH" >> .env
         echo "✓ Password hash added to .env"
     fi
 else
@@ -62,9 +66,12 @@ else
     exit 1
 fi
 
-# Restart application
-echo "Restarting application..."
-docker compose restart
+# Stop and restart to reload environment variables
+echo "Stopping containers..."
+docker compose down
+
+echo "Starting containers with new password..."
+docker compose up -d
 
 echo ""
 echo "=============================================="
