@@ -1,0 +1,52 @@
+# Environment variables (NEVER commit secrets!)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database (SQLite)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.bak
+.ngrok_url
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.env.backup

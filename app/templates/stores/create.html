@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Add Store - Shopify Price Manager{% endblock %}
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <h2>Add New Store</h2>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/stores/new">
+        <div class="form-group">
+            <label for="name">Store Name</label>
+            <input type="text" id="name" name="name" required placeholder="e.g., US Store">
+        </div>
+        <div class="form-group">
+            <label for="shopify_domain">Shopify Domain</label>
+            <input type="text" id="shopify_domain" name="shopify_domain" required placeholder="mystore.myshopify.com">
+        </div>
+        <div class="form-group">
+            <label for="api_token">Admin API Access Token</label>
+            <input type="password" id="api_token" name="api_token" required placeholder="shpat_...">
+        </div>
+        <div class="flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">Create Store</button>
+            <a href="/stores" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

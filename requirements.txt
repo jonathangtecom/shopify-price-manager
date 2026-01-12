@@ -1,0 +1,20 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+jinja2==3.1.5
+python-multipart==0.0.20
+itsdangerous==2.2.0
+
+# Database
+aiosqlite==0.20.0
+
+# HTTP client (for Shopify API)
+httpx==0.28.1
+
+# Password hashing
+bcrypt==4.2.1
+
+# Utilities
+pydantic==2.10.6
+pydantic-settings==2.7.1
+python-dotenv==1.0.1

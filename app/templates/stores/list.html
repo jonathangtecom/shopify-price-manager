@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Stores - Shopify Price Manager{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="flex justify-between align-center mb-4">
+        <h2>Stores</h2>
+        <div class="flex gap-2">
+            <form method="POST" action="/api/sync/all" style="display: inline;">
+                <button type="submit" class="btn btn-success">🔄 Sync All Active</button>
+            </form>
+            <a href="/stores/new" class="btn btn-primary">+ Add Store</a>
+        </div>
+    </div>
+    {% if stores %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Domain</th>
+                <th>Status</th>
+                <th>Last Sync</th>
+                <th>Paused</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for store in stores %}
+            <tr>
+                <td><strong>{{ store.name }}</strong></td>
+                <td class="text-muted">{{ store.shopify_domain }}</td>
+                <td>
+                    {% if store.last_sync_status.value == 'running' %}
+                        <span class="badge badge-info">🔄 Running</span>
+                    {% elif store.last_sync_status.value == 'success' %}
+                        <span class="badge badge-success">✓ Success</span>
+                    {% elif store.last_sync_status.value == 'failed' %}
+                        <span class="badge badge-danger">✗ Failed</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Idle</span>
+                    {% endif %}
+                </td>
+                <td class="text-muted">
+                    {% if store.last_sync_at %}
+                        {{ store.last_sync_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                        Never
+                    {% endif %}
+                </td>
+                <td>
+                    {% if store.is_paused %}
+                        <span class="badge badge-warning">Paused</span>
+                    {% else %}
+                        <span class="badge badge-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="/stores/{{ store.id }}" class="btn btn-sm btn-primary">Edit</a>
+                        <form method="POST" action="/stores/{{ store.id }}/pause" style="display: inline;">
+                            {% if store.is_paused %}
+                                <button type="submit" class="btn btn-sm btn-success">Resume</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-sm btn-warning">Pause</button>
+                            {% endif %}
+                        </form>
+                        {% if not store.is_paused %}
+                        <form method="POST" action="/stores/{{ store.id }}/sync" style="display: inline;">
+                            <button type="submit" class="btn btn-sm" style="background: #17a2b8; color: white;">Sync</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No stores configured yet. <a href="/stores/new">Add your first store</a>.</p>
+    {% endif %}
+</div>
+{% endblock %}
