@@ -34,6 +34,9 @@ if [ -z "$HASH" ]; then
     exit 1
 fi
 
+# Escape $ as $$ for docker-compose .env file
+HASH_ESCAPED="${HASH//\$/\$\$}"
+
 echo "✓ Hash generated: ${HASH:0:20}..."
 
 # Step 3: Backup and update .env
@@ -50,13 +53,15 @@ else
     echo "⚠ Generated new session_secret"
 fi
 
-# Step 4: Create new .env with correct values
+# Step 4: Create new .env with correct values (escape $ as $$ for docker-compose)
+SESSION_SECRET_ESCAPED="${SESSION_SECRET//\$/\$\$}"
+
 echo ""
 echo "Writing new .env file..."
 cat > .env << EOF
-admin_password_hash="$HASH"
-session_secret="$SESSION_SECRET"
-database_path="/app/data/app.db"
+admin_password_hash=$HASH_ESCAPED
+session_secret=$SESSION_SECRET_ESCAPED
+database_path=/app/data/app.db
 EOF
 
 echo "✓ .env updated"
