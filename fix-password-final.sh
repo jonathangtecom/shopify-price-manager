@@ -54,9 +54,9 @@ fi
 echo ""
 echo "Writing new .env file..."
 cat > .env << EOF
-admin_password_hash=$HASH
-session_secret=$SESSION_SECRET
-database_path=/app/data/app.db
+admin_password_hash="$HASH"
+session_secret="$SESSION_SECRET"
+database_path="/app/data/app.db"
 EOF
 
 echo "✓ .env updated"
